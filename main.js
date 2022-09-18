@@ -1,10 +1,11 @@
-import * as THREE from 'three';
-import { RGBELoader } from 'RGBELoader';
+// import * as THREE from 'three';
+// import { RGBELoader } from 'RGBELoader';
 
 var viewDirection = new THREE.Vector3();
 var k = 3;
 noise.seed(Math.random());
 var time;
+let smoothness = 200;
 
 /*------------------------------
 Renderer
@@ -44,28 +45,29 @@ function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize( window.innerWidth, window.innerHeight );
+  myFunction(x);
 }
 window.addEventListener( 'resize', onWindowResize, false );
 
 /*===============================================
 MouseMove
 ===============================================*/
-function onMouseMove(e) {
-  const x = e.clientX;
-  const y = e.clientY;
+// function onMouseMove(e) {
+//   const x = e.clientX;
+//   const y = e.clientY;
 
-  gsap.to(scene.rotation, {
-    y: gsap.utils.mapRange(0, window.innerWidth, .2, -.2, x),
-    x: gsap.utils.mapRange(0, window.innerHeight, .2, -.3, y)
-  })
-}
+//   gsap.to(scene.rotation, {
+//     y: gsap.utils.mapRange(0, window.innerWidth, .2, -.2, x),
+//     x: gsap.utils.mapRange(0, window.innerHeight, .2, -.3, y)
+//   })
+// }
 
 //window.addEventListener('mousemove', onMouseMove);
 
 /*===============================================
 reflection
 ===============================================*/
-const hdrEquirect = new RGBELoader().load(
+const hdrEquirect = new THREE.RGBELoader().load(
   "./empty_warehouse_01_4k.hdr",
   () => {
     hdrEquirect.mapping = THREE.EquirectangularReflectionMapping;
@@ -75,7 +77,7 @@ const hdrEquirect = new RGBELoader().load(
 /*===============================================
 sphere
 ===============================================*/
-const geometry = new THREE.SphereGeometry( 1, 200, 200 );
+const geometry = new THREE.SphereGeometry( 1, smoothness, smoothness );
 const material = new THREE.MeshPhysicalMaterial({  
   transparent: true,
   opacity: 1,
@@ -91,13 +93,13 @@ const sphere = new THREE.Mesh( geometry, material );
 sphere.scale.x = 2;
 sphere.scale.y = 2;
 sphere.scale.z = 2;
-sphere.position.x = 1;
+let posX = 1;
 scene.add( sphere );
 
 
 function sp() {
   var mag = 0.1;
-  sphere.position.x = Math.cos(time)*mag + 1;
+  sphere.position.x = Math.cos(time)*mag + posX;
   sphere.position.y = Math.sin(time * 0.8)*mag;
 
   const {array} = sphere.geometry.attributes.position;
@@ -115,6 +117,18 @@ function sp() {
   sphere.geometry.normalsNeedUpdate = true;
   sphere.geometry.verticesNeedUpdate = true;
 }
+
+function myFunction(x) {
+  if (x.matches) { // If media query matches
+    posX = 1.7;
+    console.log(sphere.position.x);
+  } else {
+    posX = 1;
+  }
+}
+
+var x = window.matchMedia("(max-width: 700px)")
+myFunction(x) // Call listener function at run time
 
 
 /*------------------------------
